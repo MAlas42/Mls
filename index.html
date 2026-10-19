@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLS NETWORK - Kripto Kazım Simülatörü</title>
+    <script src="https://telegram.org"></script>
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            user-select: none;
+        }
+        .header {
+            margin-bottom: 20px;
+        }
+        .username {
+            color: #0088cc;
+            font-weight: bold;
+        }
+        .stats-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .balance {
+            font-size: 32px;
+            font-weight: bold;
+            color: #f3ba2f;
+            margin: 10px 0;
+        }
+        .hashrate {
+            font-size: 16px;
+            color: #4cd137;
+        }
+        .coin-btn {
+            background: radial-gradient(circle, #f3ba2f 0%, #d4a317 100%);
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(243, 186, 47, 0.4);
+            transition: transform 0.1s ease;
+            border: 5px solid #fff;
+        }
+        .coin-btn:active {
+            transform: scale(0.95);
+        }
+        .market-title {
+            text-align: left;
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #a4b0be;
+        }
+        .market-item {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 12px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .item-info {
+            text-align: left;
+        }
+        .item-name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .item-effect {
+            font-size: 12px;
+            color: #4cd137;
+        }
+        .buy-btn {
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .buy-btn:disabled {
+            background-color: #718093;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>MLS AĞ MADENCİLİĞİ</h2>
+        <p>Hoş geldin, <span id="user-name" class="username">Madenci</span>!</p>
+    </div>
+
+    <div class="stats-container">
+        <div>Toplam Bakiye</div>
+        <div class="balance"><span id="balance-amount">0.00</span> MLS</div>
+        <div class="hashrate">Kazım Hızı: +<span id="hashrate-amount">0.0</span> MLS/sn</div>
+    </div>
+
+    <div class="coin-btn" id="click-coin">⛏️</div>
+
+    <div class="market-title">Donanım Mağazası</div>
+    
+    <div class="market-item">
+        <div class="item-info">
+            <div class="item-name">Sanal Ekran Kartı (GTX 1660)</div>
+            <div class="item-effect">+0.1 MLS/sn Pasif Gelir</div>
+        </div>
+        <button class="buy-btn" id="buy-gpu1">10 MLS</button>
+    </div>
+
+    <div class="market-item">
+        <div class="item-info">
+            <div class="item-name">Gelişmiş Rig (RTX 4090)</div>
+            <div class="item-effect">+1.5 MLS/sn Pasif Gelir</div>
+        </div>
+        <button class="buy-btn" id="buy-gpu2">100 MLS</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
+        }
+
+        let balance = 0.0;
+        let hashrate = 0.0;
+        let gpu1Price = 10.0;
+        let gpu2Price = 100.0;
+
+        const balanceDisplay = document.getElementById('balance-amount');
+        const hashrateDisplay = document.getElementById('hashrate-amount');
+        const coinBtn = document.getElementById('click-coin');
+        const buyGpu1Btn = document.getElementById('buy-gpu1');
+        const buyGpu2Btn = document.getElementById('buy-gpu2');
+
+        function updateUI() {
+            balanceDisplay.innerText = balance.toFixed(2);
+            hashrateDisplay.innerText = hashrate.toFixed(1);
+            buyGpu1Btn.disabled = balance < gpu1Price;
+            buyGpu2Btn.disabled = balance < gpu2Price;
+        }
+
+        coinBtn.addEventListener('click', () => {
+            balance += 1.0;
+            updateUI();
+        });
+
+        buyGpu1Btn.addEventListener('click', () => {
+            if (balance >= gpu1Price) {
+                balance -= gpu1Price;
+                hashrate += 0.1;
+                gpu1Price = gpu1Price * 1.5;
+                buyGpu1Btn.innerText = gpu1Price.toFixed(0) + " MLS";
+                updateUI();
+            }
+        });
+
+        buyGpu2Btn.addEventListener('click', () => {
+            if (balance >= gpu2Price) {
+                balance -= gpu2Price;
+                hashrate += 1.5;
+                gpu2Price = gpu2Price * 1.5;
+                buyGpu2Btn.innerText = gpu2Price.toFixed(0) + " MLS";
+                updateUI();
+            }
+        });
+
+        setInterval(() => {
+            if (hashrate > 0) {
+                balance += hashrate / 10;
+                updateUI();
+            }
+        }, 100);
+
+        updateUI();
+    </script>
+</body>
+                                             </html>
+                                             
